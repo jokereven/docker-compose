@@ -1,0 +1,32 @@
+version: "3.7"
+
+networks:
+  test:
+    driver: bridge
+
+services:
+  mongo:
+    container_name: test-data-farmer-mongo
+    image: mongo:4.2
+    command: mongod --port 27017 --replSet rs0 --bind_ip mongo --wiredTigerCacheSizeGB 1
+    ports:
+      - 27017:27017
+    networks:
+      - test
+    deploy:
+      resources:
+        limits:
+          memory: 1024m
+
+  mongo-init-replica-set:
+    container_name: test-data-farmer-init-replica-set
+    image: mongo:4.2
+    command: bash -c "sleep 5 && mongo mongo:27017 --eval 'rs.initiate()'"
+    depends_on:
+      - mongo
+    networks:
+      - test
+    deploy:
+      resources:
+        limits:
+          memory: 512m
